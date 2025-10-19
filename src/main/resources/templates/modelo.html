@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Exemplo Dinâmico</title>
+</head>
+<body>
+<h1 th:text="${mensagem}">Texto padrão (aparece se Thymeleaf falhar)</h1>
+
+<ul>
+    <li th:each="nome : ${nomes}" th:text="${nome}"></li>
+</ul>
+</body>
+</html>
