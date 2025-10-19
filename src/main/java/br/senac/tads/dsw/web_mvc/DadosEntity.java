@@ -1,27 +1,44 @@
 package br.senac.tads.dsw.web_mvc;
 
+import jakarta.persistence.Entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 import java.time.LocalDate;
 
-public class DadosDto {
+@Entity
+public class DadosEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-
+    @NotBlank(message = "O nome é obrigatório")
     private String nome;
+    @Past(message = "A data de nascimento deve ser anterior a hoje")
     private LocalDate dataNascimento;
+    @Email(message = "E-mail inválido")
     private String email;
+    @NotBlank(message = "O telefone é obrigatório")
     private String telefone;
 
-    public DadosDto(Integer id, String nome, String dataNascimento,
-                    String email, String telefone) {
-        this.id = id;
+    private String nomeArquivo;
+
+    public DadosEntity() {
+    }
+
+    public DadosEntity(String nome, LocalDate dataNascimento, String email, String telefone) {
         this.nome = nome;
-        this.dataNascimento = LocalDate.parse(dataNascimento);
+        this.dataNascimento = dataNascimento;
         this.email = email;
         this.telefone = telefone;
     }
 
+    // Getters e Setters
     public Integer getId() {
         return id;
     }
@@ -61,8 +78,6 @@ public class DadosDto {
     public void setTelefone(String telefone) {
         this.telefone = telefone;
     }
-
-    private String nomeArquivo;
 
     public String getNomeArquivo() {
         return nomeArquivo;

@@ -1,38 +1,36 @@
 package br.senac.tads.dsw.web_mvc;
 
+import br.senac.tads.dsw.web_mvc.DadosDto;
+import br.senac.tads.dsw.web_mvc.DadosEntity;
+import br.senac.tads.dsw.web_mvc.DadosRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
 public class DadosService {
 
+    @Autowired
+    private DadosRepository repository;
 
-    private Map<Integer, DadosDto> dados;
-
-    public DadosService() {
-        dados = new HashMap<>();
-
-        dados.put(1, new DadosDto(1, "Fulano da Silva", "2000-10-20",
-                "fulano@email.com", "11 99999-9999"));
-        dados.put(2, new DadosDto(2, "Ciclano de Souza", "1999-05-15",
-                "ciclano@email.com", "11 98888-8888"));
-        dados.put(3, new DadosDto(3, "Beltrana dos Santos", "2001-02-09",
-                "beltrana@email.com", "11 97777-7777"));
+    public List<DadosEntity> findAll() {
+        return repository.findAll();
     }
 
-    public List<DadosDto> findAll() {
-        return new ArrayList<>(dados.values());
+    public Optional<DadosEntity> findById(Integer id) {
+        return repository.findById(id);
     }
 
+    public DadosEntity save(DadosEntity dado) {
+        return repository.save(dado);
+    }
 
-    public Optional<DadosDto> findById(Integer id) {
-        return Optional.ofNullable(dados.get(id));
+    public boolean deleteById(Integer id) {
+        if (repository.existsById(id)) {
+            repository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }
-
-
-

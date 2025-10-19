@@ -2,13 +2,230 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Exemplo Dinâmico</title>
-</head>
-<body>
-<h1 th:text="${mensagem}">Texto padrão (aparece se Thymeleaf falhar)</h1>
+    <title>Projeto Webservice REST - Frontend Web</title>
 
-<ul>
-    <li th:each="nome : ${nomes}" th:text="${nome}"></li>
-</ul>
+    <style>
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #0b5394;
+            margin-bottom: 30px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background-color: #0b5394;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+            padding: 12px;
+        }
+
+        td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background-color: #f2f2f2;
+        }
+
+        button {
+            padding: 6px 12px;
+            margin: 2px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-view { background-color: #0b5394; color: white; }
+        .btn-add { background-color: #3c78d8; color: white; }
+        .btn-edit { background-color: #6aa84f; color: white; }
+        .btn-delete { background-color: #cc0000; color: white; }
+
+        button:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        .detalhes {
+            margin-top: 30px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .detalhes h2 {
+            color: #0b5394;
+            margin-top: 0;
+        }
+
+        .detalhes p {
+            font-size: 15px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Projeto Webservice REST - Frontend Web</h1>
+
+<table id="tabela-dados">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Nome</th>
+        <th>Ações</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<form id="formCadastro" onsubmit="salvar(event)">
+    <input type="text" id="nome" placeholder="Nome" required>
+    <input type="date" id="dataNascimento" required>
+    <input type="email" id="email" placeholder="E-mail" required>
+    <input type="tel" id="telefone" placeholder="Telefone" required>
+    <input type="file" id="arquivo">
+    <button type="submit" class="btn-add">Salvar</button>
+</form>
+
+
+<div class="detalhes" id="detalhes"></div>
+
+<script>
+
+    async function salvar(event) {
+  event.preventDefault();
+  const form = document.getElementById('formCadastro');
+  const data = {
+    nome: form.nome.value,
+    dataNascimento: form.dataNascimento.value,
+    email: form.email.value,
+    telefone: form.telefone.value
+  };
+
+  await fetch('/api/dados', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  alert('Cadastro realizado!');
+  carregarDados();
+}
+
+    const API_URL = '/api/dados';
+
+    // Carrega todos os registros
+    async function carregarDados() {
+        const resp = await fetch(API_URL);
+        const dados = await resp.json();
+
+        const tbody = document.querySelector('#tabela-dados tbody');
+        tbody.innerHTML = '';
+
+        dados.forEach(d => {
+            const linha = document.createElement('tr');
+            linha.innerHTML = `
+                <td>${d.id}</td>
+                <td>${d.nome}</td>
+                <td>
+                    <button class="btn-view" onclick="verDetalhes(${d.id})">Ver</button>
+                    <button class="btn-add" onclick="novoCadastro()">Novo</button>
+                    <button class="btn-edit" onclick="editar(${d.id})">Editar</button>
+                    <button class="btn-delete" onclick="excluir(${d.id})">Excluir</button>
+                </td>
+            `;
+            tbody.appendChild(linha);
+        });
+    }
+
+    // Ver detalhes
+    async function verDetalhes(id) {
+        const resp = await fetch(`${API_URL}/${id}`);
+        const d = await resp.json();
+
+        const div = document.getElementById('detalhes');
+        div.innerHTML = `
+            <h2>#${d.id} - ${d.nome}</h2>
+            <p><strong>Data de nascimento:</strong> ${d.dataNascimento}</p>
+            <p><strong>E-mail:</strong> ${d.email}</p>
+            <p><strong>Telefone:</strong> ${d.telefone}</p>
+        `;
+    }
+
+    // Novo cadastro (POST)
+    async function novoCadastro() {
+        const nome = prompt("Nome:");
+        const dataNascimento = prompt("Data de nascimento (YYYY-MM-DD):");
+        const email = prompt("E-mail:");
+        const telefone = prompt("Telefone:");
+
+        const novo = { nome, dataNascimento, email, telefone };
+
+        await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(novo)
+        });
+
+        alert("Novo cadastro adicionado!");
+        carregarDados();
+    }
+
+    // Editar (PUT)
+    async function editar(id) {
+        const nome = prompt("Novo nome:");
+        const dataNascimento = prompt("Nova data de nascimento (YYYY-MM-DD):");
+        const email = prompt("Novo e-mail:");
+        const telefone = prompt("Novo telefone:");
+
+        const atualizado = { nome, dataNascimento, email, telefone };
+
+        await fetch(`${API_URL}/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(atualizado)
+        });
+
+        alert("Registro atualizado!");
+        carregarDados();
+    }
+
+    // Excluir (DELETE)
+    async function excluir(id) {
+        if (confirm("Tem certeza que deseja excluir este registro?")) {
+            await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            alert("Registro excluído!");
+            carregarDados();
+        }
+    }
+
+    // Inicializa a página
+    carregarDados();
+</script>
+
 </body>
 </html>

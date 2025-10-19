@@ -1,17 +1,14 @@
 package br.senac.tads.dsw.web_mvc;
 
-import java.util.List;
-import java.util.Optional;
-
+import br.senac.tads.dsw.web_mvc.DadosEntity;
+import br.senac.tads.dsw.web_mvc.DadosService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/dados")
@@ -20,30 +17,51 @@ public class DadosRestController {
     @Autowired
     private DadosService service;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @GetMapping
-    public String findAll() {
-        List<DadosDto> dados = service.findAll();
-        try {
-            return objectMapper.writeValueAsString(dados);
-        } catch (JsonProcessingException ex) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public List<DadosEntity> findAll() {
+        return service.findAll();
     }
 
     @GetMapping("/{id}")
-    public String findById(@PathVariable("id") Integer id) {
-        Optional<DadosDto> optDados = service.findById(id);
-        if (!optDados.isPresent()) {
+    public DadosEntity findById(@PathVariable Integer id) {
+        return service.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public DadosEntity create(@RequestBody @Valid DadosEntity dado) {
+        return service.save(dado);
+    }
+
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void update(@PathVariable Integer id, @RequestBody @Valid DadosEntity dado) {
+        if (!service.findById(id).isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        try {
-            return objectMapper.writeValueAsString(optDados.get());
-        } catch (JsonProcessingException ex) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        dado.setId(id);
+        service.save(dado);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Integer id) {
+        if (!service.deleteById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }
 
+    @PostMapping("/upload")
+    @ResponseStatus(HttpStatus.CREATED)
+    public DadosEntity createWithUpload(
+            @Valid @ModelAttribute DadosEntity dado,
+            @RequestParam(required = false) MultipartFile arquivo) {
+
+        if (arquivo != null && !arquivo.isEmpty()) {
+            dado.setNomeArquivo(arquivo.getOriginalFilename());
+        }
+
+        return service.save(dado);
+    }
 }

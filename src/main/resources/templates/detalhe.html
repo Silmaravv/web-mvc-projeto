@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes / Novo Cadastro</title>
+    <style>
+        body { font-family: Arial; margin: 40px; background: #f8f8f8; }
+        h1 { color: #0b5394; }
+        form { background: white; padding: 20px; border-radius: 8px; width: 400px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #0b5394; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { opacity: 0.8; }
+        a { display: block; margin-top: 10px; text-align: center; color: #0b5394; text-decoration: none; }
+    </style>
+</head>
+<body>
+<h1 th:text="${dado.id != null ? 'Editar Cadastro' : 'Novo Cadastro'}"></h1>
+
+<form th:action="@{/dados}" th:object="${dado}" method="post">
+    <input type="hidden" th:field="*{id}">
+    <label>Nome:</label>
+    <input type="text" th:field="*{nome}" required>
+
+    <label>Data de Nascimento:</label>
+    <input type="date" th:field="*{dataNascimento}" required>
+
+    <label>Email:</label>
+    <input type="email" th:field="*{email}" required>
+
+    <label>Telefone:</label>
+    <input type="text" th:field="*{telefone}" required>
+
+    <label>Arquivo:</label>
+    <input type="file" name="arquivo">
+
+    <button type="submit">Salvar</button>
+</form>
+
+<a href="/dados">Voltar</a>
+</body>
+</html>

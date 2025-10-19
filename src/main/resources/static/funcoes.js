@@ -11,6 +11,9 @@ async function findAll() {
         <td>${dado.id}</td>
         <td>${dado.nome}</td>
         <td><button onclick="findById(${dado.id})">Ver detalhes</button></td>
+        <td><button onclick="findById(${dado.id})">Novo cadastro</button></td>
+        <td><button onclick="findById(${dado.id})">Editar</button></td>
+        <td><button onclick="findById(${dado.id})">Excluir</button></td>
       </tr>`;
     elDados.insertAdjacentHTML('beforeend', item);
   });
